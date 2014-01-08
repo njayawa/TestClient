@@ -14,9 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.gson.Gson;
+import com.twitter.Socket.Class.TvDisplayMessage;
 import com.twitter.Socket.Class.TvMessage;
 import com.twitter.Socket.Class.TvProgramChange;
 
@@ -29,34 +31,21 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MainActivity extends ActionBarActivity {
 
     private EditText txtEdit;
+    private EditText txtMessage;
     private Socket socket;
     private BufferedReader socketreader;
     private BufferedWriter socketWriter;
     private Handler mHandler;
     Gson gson = new Gson();
-    private volatile boolean connected = false;
-    Queue<TvMessage> readQueue = new ConcurrentLinkedQueue<TvMessage>();
-    Queue<TvMessage> writeQueue = new ConcurrentLinkedQueue<TvMessage>();
+    private volatile boolean connected = false;;
 
-    private void writeToWriteQ(TvMessage msg)
-    {
-        synchronized (writeQueue) {
-            writeQueue.add(msg);
-        }
-    }
-
-    private TvMessage readFromWriteQ() {
-        synchronized (writeQueue) {
-            if(!writeQueue.isEmpty()) return readQueue.remove();
-        }
-        return null;
-    }
 
     private void createConnection(String hostName) {
         try {
@@ -88,7 +77,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    public void readFromSocket() {
+    private void readFromSocket() {
         String s;
         while(connected) {
             try {
@@ -119,6 +108,29 @@ public class MainActivity extends ActionBarActivity {
                     .commit();
         }
         txtEdit = (EditText) findViewById(R.id.editText);
+        txtMessage = (EditText) findViewById(R.id.editText2);
+
+        final Button button = (Button) findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                TvMessage msg = new TvMessage();
+                msg.Message = TvDisplayMessage.MESSAGE;
+                msg.DisplayMessage = new TvDisplayMessage();
+                msg.DisplayMessage.Caption = "Caption";
+                msg.DisplayMessage.Text = txtMessage.getText().toString();
+                ArrayList<String> buttons = new ArrayList<String>();
+                String[] btnStr = {"Hello", "World"};
+                msg.DisplayMessage.Buttons = btnStr;
+                msg.DisplayMessage.DurationSeconds = "15";
+                try {
+                    sendMessage(msg);
+                } catch(IOException ex) {
+                    txtEdit.setText("Error occurred while sending message" + ex.toString());
+                }
+            }
+        });
+
         mHandler = new Handler(Looper.getMainLooper())
         {
             @Override
@@ -146,7 +158,7 @@ public class MainActivity extends ActionBarActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                createConnection("172.25.252.64");
+                createConnection("172.25.252.71");
             }
         } ).start();
     }
@@ -164,6 +176,15 @@ public class MainActivity extends ActionBarActivity {
             }
         }
         super.onDestroy();
+    }
+
+    public void sendMessage(TvMessage msg) throws IOException {
+        if(connected && socketWriter != null && msg != null) {
+            String msgText = gson.toJson(msg);
+            socketWriter.write(msgText);
+            socketWriter.newLine();
+            socketWriter.flush();
+        }
     }
 
 

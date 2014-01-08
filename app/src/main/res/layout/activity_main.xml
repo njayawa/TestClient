@@ -8,7 +8,7 @@
 
     <EditText
         android:layout_width="match_parent"
-        android:layout_height="531dp"
+        android:layout_height="272dp"
         android:inputType="textMultiLine"
         android:ems="10"
         android:id="@+id/editText"
@@ -18,5 +18,18 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        />
+        android:layout_gravity="center_horizontal|bottom" />
+
+    <Button
+        android:layout_width="84dp"
+        android:layout_height="wrap_content"
+        android:text="Submit"
+        android:id="@+id/button"
+        android:layout_gravity="right|top" />
+
+    <EditText
+        android:layout_width="290dp"
+        android:layout_height="50dp"
+        android:id="@+id/editText2"
+        android:layout_gravity="left|top" />
 </FrameLayout>

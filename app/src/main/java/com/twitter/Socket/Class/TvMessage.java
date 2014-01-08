@@ -6,4 +6,5 @@ package com.twitter.Socket.Class;
 public class TvMessage {
     public String Message;
     public TvProgramChange ProgramChangeInfo;
+    public TvDisplayMessage DisplayMessage;
 }
