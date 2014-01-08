@@ -88,7 +88,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    void readFromSocket() {
+    public void readFromSocket() {
         String s;
         while(connected) {
             try {
@@ -157,7 +157,11 @@ public class MainActivity extends ActionBarActivity {
         if(socket != null) {
             try{
             socket.close();
-            } catch (IOException ex) {}
+            } catch (IOException ex) {
+
+            } finally {
+                socket = null;
+            }
         }
         super.onDestroy();
     }
@@ -184,50 +188,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
-    private class ReadFromSocketTask extends AsyncTask<String, Void, TvMessage> {
 
-        @Override
-        protected TvMessage doInBackground(String... urls) {
-            String response = "An exception occurred while connecting";
-
-
-            try {
-                if(socket == null)
-                {
-                    final InetAddress serverAddr = InetAddress.getByName("172.25.252.64");
-                    socket = new Socket(serverAddr, 8675);
-
-                }
-
-                if(socketreader == null)
-                {
-                    socketreader = new BufferedReader(
-                            new InputStreamReader(socket.getInputStream()));
-                }
-
-
-                String s;
-                s = socketreader.readLine();
-                response = s;
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            TvMessage msg = null;
-            if(response != null)
-            {
-                msg = gson.fromJson(response, TvMessage.class);
-            }
-            return msg;
-        }
-
-        @Override
-        protected void onPostExecute(TvMessage result) {
-        }
-    }
 
     /**
      * A placeholder fragment containing a simple view.
